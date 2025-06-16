@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relógio de Preenchimento Circular</title>
+    <style>
+:root {
+    /* Cores de Fundo e Sombra */
+    --background-color: #f0f0f0;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+
+    /* Novos Degradês */
+    --blue-gradient-start: #007bff; /* Azul vibrante */
+    --blue-gradient-end: #0056b3;    /* Azul mais escuro */
+
+    /* Aqui você cola as novas linhas, substituindo as antigas */
+    --grey-gradient-start: #e0e0e0; /* Cinza muito claro */
+    --grey-gradient-end: #d0d0d0;    /* Um pouco mais escuro */
+
+    --red-gradient-start: #dc3545; /* Vermelho vibrante */
+    --red-gradient-end: #a71d2a;    /* Vermelho mais escuro */
+
+    --orange-gradient-start: #ffc107; /* Laranja vibrante */
+    --orange-gradient-end: #e0a800;    /* Laranja mais escuro */
+
+    /* Variáveis para o progresso do JavaScript (mantidas) */
+    --progress: 0; /* 0 a 100 - Controla o preenchimento pelo JS */
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--background-color);
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.clock-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clock-face {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    /* O fundo padrão do clock-face é azul */
+    background: linear-gradient(to right, #1E90FF, #87CEEB);
+    border-radius: 15px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Transição para a mudança de cor de fundo */
+    transition: background 0.7s ease-in-out;
+}
+
+/* Onde a magia do preenchimento circular acontece (sempre cinza) */
+.clock-face::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    /* A cor de preenchimento SEMPRE será cinza */
+    background: conic-gradient(
+        var(--grey-gradient-start) calc(var(--progress) * 1%),
+        var(--grey-gradient-end) calc(var(--progress) * 1% + 1%),
+        transparent calc(var(--progress) * 1% + 1%)
+    );
+    transform: rotate(-0deg);
+    transform-origin: center;
+    transition: background 0.1s linear; /* Transição suave para o preenchimento */
+}
+
+/* Estilo para quando o tempo estiver nos 30% finais (ativado pelo JavaScript) */
+.clock-face.time-almost-up {
+    /* O fundo do clock-face agora piscará com esta animação */
+    animation: blink-red-to-orange 1s infinite alternate;
+}
+
+/* Animação para o piscar de vermelho degradê para laranja degradê NO FUNDO DO CLOCK-FACE */
+@keyframes blink-red-to-orange {
+    0%, 100% {
+        background: linear-gradient(to right, var(--red-gradient-start), var(--red-gradient-end));
+    }
+    50% {
+        background: linear-gradient(to right, var(--orange-gradient-start), var(--orange-gradient-end));
+    }
+}
+
+.clock-content {
+    width: 150px;
+    height: 150px;
+    padding: 5px 5px;
+    background-color: #ffffff;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    z-index: 20;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <div class="clock-face"></div>
+        <div class="clock-content"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const clockFace = document.querySelector('.clock-face');
+
+    let currentProgress = 0;
+    const totalTimeMs = 10000; // Por exemplo, 10 segundos
+    const updateIntervalMs = 16; // Aproximadamente 60fps
+
+    const steps = totalTimeMs / updateIntervalMs;
+    const progressPerStep = 100 / steps;
+
+    let intervalId;
+
+    function updateClock() {
+        if (currentProgress <= 100) {
+            clockFace.style.setProperty('--progress', currentProgress);
+
+            const percentageRemaining = 100 - currentProgress;
+
+            // Lógica para adicionar/remover a classe que controla a animação do fundo
+            if (percentageRemaining <= 40 && percentageRemaining > 0) {
+                clockFace.classList.add('time-almost-up');
+            } else {
+                clockFace.classList.remove('time-almost-up');
+            }
+
+            currentProgress += progressPerStep;
+        } else {
+            clearInterval(intervalId);
+            clockFace.classList.remove('time-almost-up'); // Garante que a classe seja removida no final
+            console.log('Preenchimento completo!');
+
+            setTimeout(() => {
+                currentProgress = 0;
+                startClock();
+            }, 2000);
+        }
+    }
+
+    function startClock() {
+        currentProgress = 0;
+        clockFace.classList.remove('time-almost-up'); // Garante que a classe seja removida ao reiniciar
+        // O fundo do clock-face será redefinido para azul ao remover a classe time-almost-up
+        intervalId = setInterval(updateClock, updateIntervalMs);
+    }
+
+    startClock();
+});
+    </script>
+</body>
+</html>
