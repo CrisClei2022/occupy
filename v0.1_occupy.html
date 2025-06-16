@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relógio de Preenchimento Circular</title>
+    <style>
+        :root {
+            /* Cores personalizadas para fácil ajuste */
+            --background-color: #f0f0f0;
+            --clock-bg-color: #333;
+            --fill-color: #4CAF50; /* Verde */
+            --text-color: #fff; /* Esta cor agora é menos relevante, mas pode ser útil para debug */
+            --shadow-color: rgba(0, 0, 0, 0.3);
+
+            /* Variáveis para o progresso do JavaScript */
+            --progress: 0; /* 0 a 100 */
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .clock-container {
+            width: 200px;
+            height: 200px;
+            perspective: 1000px; /* Para um leve efeito 3D no sombreamento */
+            box-shadow: 0 10px 20px var(--shadow-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clock-face {
+            position: relative;
+            width: 180px; /* Um pouco menor que o container */
+            height: 180px;
+            border-radius: 50%;
+            background-color: var(--clock-bg-color);
+            overflow: hidden; /* Garante que o gradiente fique dentro do círculo */
+            /* Removidas as propriedades de alinhamento de texto, pois não haverá texto */
+            /* font-size: 2em; */
+            /* color: var(--text-color); */
+            /* font-weight: bold; */
+        }
+
+        /* Onde a magia acontece: o preenchimento circular */
+        .clock-face::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            /* Gradiente cônico que simula o preenchimento */
+            background: conic-gradient(
+                var(--fill-color) calc(var(--progress) * 1%), /* Cor de preenchimento até o progresso */
+                transparent calc(var(--progress) * 1%) /* Transparente após o progresso */
+            );
+            transform: rotate(-0deg); /* Ajusta a rotação para começar de cima */
+            transform-origin: center;
+            transition: background 0.1s linear; /* Suaviza a transição do gradiente */
+        }
+
+        /* Removido o estilo para .percentage-text, pois o elemento foi removido */
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <div class="clock-face">
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const clockFace = document.querySelector('.clock-face');
+
+    let currentProgress = 0;
+    const totalTimeMs = 10000; // Por exemplo, 30 segundos
+    const updateIntervalMs = 16;
+
+    const steps = totalTimeMs / updateIntervalMs;
+    const progressPerStep = 100 / steps;
+
+    const warningThresholdPercentage = 70; // A cor muda quando o progresso atinge 70% (30% restantes)
+
+    let intervalId;
+
+    function updateClock() {
+        if (currentProgress <= 100) {
+            clockFace.style.setProperty('--progress', currentProgress);
+
+            // Calcula o tempo restante em porcentagem
+            const percentageRemaining = 100 - currentProgress;
+
+            // Lógica para mudar a cor nos 30% finais
+            if (percentageRemaining <= 30 && percentageRemaining > 0) {
+                clockFace.classList.add('time-almost-up');
+            } else {
+                clockFace.classList.remove('time-almost-up');
+            }
+
+            currentProgress += progressPerStep;
+        } else {
+            clearInterval(intervalId);
+            clockFace.classList.remove('time-almost-up'); // Garante que a classe seja removida no final
+            console.log('Preenchimento completo!');
+
+            setTimeout(() => {
+                currentProgress = 0;
+                startClock();
+            }, 2000);
+        }
+    }
+
+    function startClock() {
+        currentProgress = 0;
+        clockFace.classList.remove('time-almost-up'); // Garante que a classe seja removida ao reiniciar
+        intervalId = setInterval(updateClock, updateIntervalMs);
+    }
+
+    startClock();
+});
+    </script>
+</body>
+</html>
