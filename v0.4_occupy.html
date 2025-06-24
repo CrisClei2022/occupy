@@ -45,6 +45,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* To accommodate two clocks side-by-side, we'll give it some space */
+    margin: 0 20px;
+}
+
+/* New container for the second clock to place it next to the first one */
+.double-clock-container {
+    display: flex; /* Arrange clocks horizontally */
+    gap: 40px; /* Space between the two clock containers */
 }
 
 .clock-face {
@@ -100,13 +108,13 @@ body {
 }
 
 .clock-content {
-	/* visibility: hidden;  Oculta visualmente, mas mantém o espaço */
+    /* visibility: hidden; Oculta visualmente, mas mantém o espaço */
     width: 150px;
     height: 150px;
     padding: 5px 5px;
     background-color: #ffffff;
-	border-radius: 8px;
-	box-shadow: *0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: absolute;
     z-index: 20;
     top: 50%;
@@ -116,14 +124,19 @@ body {
     </style>
 </head>
 <body>
-    <div class="clock-container">
-        <div class="clock-face" id="clock-face1"></div>
-        <div class="clock-content"></div>
-        <!--<div class="clock-face" id="clock-face2"></div>
-        <div class="clock-content"></div>-->
+    <div class="double-clock-container">
+        <div class="clock-container">
+            <div class="clock-face" id="clock-face1"></div>
+            <div class="clock-content"></div>
+        </div>
+
+        <div class="clock-container">
+            <div class="clock-face" id="clock-face2"></div>
+            <div class="clock-content"></div>
+        </div>
     </div>
 
-    <script>
+<script>
 function createClock(clockFaceId) {
     const clockFace = document.getElementById(clockFaceId);
 
@@ -183,12 +196,12 @@ function createClock(clockFaceId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // To use it:
-    const myClock = createClock('clock-face1');
-    myClock.start(); // Start the clock for 'clock-face1'
+    const clock1 = createClock('clock-face1');
+    clock1.start(); // Start the clock for 'clock-face1'
 
     // You could create another one for 'clock-face2' if you had one:
-    // const anotherClock = createClock('clock-face2');
-    // anotherClock.start();
+    const clock2 = createClock('clock-face2');
+    clock2.start();
 });
     </script>
 </body>
